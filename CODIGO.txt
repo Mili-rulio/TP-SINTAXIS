@@ -1,0 +1,112 @@
+//Benchmarking swift QuickSort (se podria complejizar utilizando la dependencia de Benchmarking):
+
+import Foundation
+
+// Función de ordenamiento Quick Sort genérica
+func quickSort<T: Comparable>(_ array: inout [T], low: Int, high: Int) {
+    if low < high {
+        let pivotIndex = partition(&array, low: low, high: high)
+        quickSort(&array, low: low, high: pivotIndex)
+        quickSort(&array, low: pivotIndex + 1, high: high)
+    }
+}
+
+// Función para particionar el array en Quick Sort
+func partition<T: Comparable>(_ array: inout [T], low: Int, high: Int) -> Int {
+    let pivot = array[low]
+    var left = low
+    var right = high
+
+    while true {
+        while array[left] < pivot {
+            left += 1
+        }
+        while array[right] > pivot {
+            right -= 1
+        }
+
+        if left < right {
+            array.swapAt(left, right)
+        } else {
+            return right
+        }
+    }
+}
+
+// Función de benchmark para Quick Sort
+func quickSortBenchmark() {
+    let dateStart = Date()
+
+    // Genera un array de números del 1 al 1000 en orden aleatorio
+    var array = (1...1000).shuffled()
+    
+    quickSort(&array, low: 0, high: array.count - 1)
+
+    let dateNow = Date()
+
+  // Calculo de diferencia de tiempo en segundos
+let timeDifference = dateNow.timeIntervalSince(dateStart)
+
+print("Diferencia de tiempo en segundos: \(timeDifference)")
+}
+
+// Ejecuta el benchmark
+quickSortBenchmark()
+
+
+
+
+
+
+//Benchmarking kotlin QuickSort (se podría complejizar utilizando la dependencia de JMH Dependency):
+
+import java.time.Duration
+import java.time.Instant
+import java.util.Random
+
+fun main(args: Array<String>) {
+    val random = Random()
+
+    val array = IntArray(1000) { random.nextInt(1000) }
+    val timestamp1 = Instant.now()
+    quickSort(array, 0, array.size-1)
+    val timestamp2 = Instant.now()
+    val duration: Duration = Duration.between(timestamp1, timestamp2)
+    val differenceInMilliseconds = duration.toMillis()
+    println("Diferencia en milisegundos: $differenceInMilliseconds")
+}
+
+fun quickSort(array: IntArray, left: Int, right: Int) {
+    val index = partition (array, left, right)
+    if(left < index-1) { // 2) Sorting left half
+        quickSort(array, left, index-1)
+    }
+    if(index < right) { // 3) Sorting right half
+        quickSort(array,index, right)
+    }
+}
+
+fun partition(array: IntArray, l: Int, r: Int): Int {
+    var left = l
+    var right = r
+    val pivot = array[(left + right)/2] // 4) Pivot Point
+    while (left <= right) {
+        while (array[left] < pivot) left++ // 5) Find the elements on left that should be on right
+
+        while (array[right] > pivot) right-- // 6) Find the elements on right that should be on left
+
+        // 7) Swap elements, and move left and right indices
+        if (left <= right) {
+            swapArray(array, left,right)
+            left++
+            right--
+        }
+    }
+    return left
+}
+
+fun swapArray(a: IntArray, b: Int, c: Int) {
+    val temp = a[b]
+    a[b] = a[c]
+    a[c] = temp
+}
